@@ -19,9 +19,18 @@ _report_fingerprint_db(){
     hash3=$(echo "$i" | cut -d':' -f5)
     hash4=$(echo "$i" | cut -d':' -f6)
     hash5=$(echo "$i" | cut -d':' -f7)
+    hashdec1="$((2#$(echo "${hash1}" | cut -c -26)))"
+    hashdec2="$((2#$(echo "${hash1}" | cut -c 27-53)))"
+    hashdec3="$((2#$(echo "${hash1}" | cut -c 54-80)))"
+    hashdec4="$((2#$(echo "${hash1}" | cut -c 81-107)))"
+    hashdec5="$((2#$(echo "${hash1}" | cut -c 108-134)))"
+    hashdec6="$((2#$(echo "${hash1}" | cut -c 135-161)))"
+    hashdec7="$((2#$(echo "${hash1}" | cut -c 162-188)))"
+    hashdec8="$((2#$(echo "${hash1}" | cut -c 189-215)))"
+    hashdec9="$((2#$(echo "${hash1}" | cut -c 216-242)))"
     startframe=$(echo "$i" | cut -d':' -f1)
     endframe=$(echo "$i" | cut -d':' -f2)
-    echo "INSERT INTO fingerprints (objectIdentifierValue,startframe,endframe,hash1,hash2,hash3,hash4,hash5) VALUES ('${MEDIA_ID}','${startframe}','${endframe}','${hash1}','${hash2}','${hash3}','${hash4}','${hash5}')" | mysql --login-path="${DBLOGINPATH}"  "${DBNAME}"
+    echo "INSERT INTO fingerprints (objectIdentifierValue,startframe,endframe,hash1,hash2,hash3,hash4,hash5,hash6,hash7,hash8,hash9) VALUES ('${MEDIA_ID}','${startframe}','${endframe}','${hashdec1}','${hashdec2}','${hashdec3}','${hashdec4}','${hashdec5}','${hashdec6}','${hashdec7}','${hashdec8}','${hashdec9}')" | mysql --login-path="${DBLOGINPATH}"  "${DBNAME}"
     done)
 }
 
