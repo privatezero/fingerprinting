@@ -41,7 +41,7 @@ read -r DB_NAME
 echo "CREATE DATABASE "$DB_NAME"" | mysql --login-path=tempsetting
 _error_check
 echo "CREATE TABLE object (objectIdentifierValueID bigint NOT NULL AUTO_INCREMENT,objectIdentifierValue varchar(1000) NOT NULL UNIQUE,objectDB_Insertion datetime NOT NULL DEFAULT NOW(),object_LastTouched datetime NOT NULL,PRIMARY KEY (objectIdentifierValueID))" | mysql --login-path=tempsetting "$DB_NAME"
-echo "CREATE TABLE fingerprints (hashNumber bigint NOT NULL AUTO_INCREMENT, objectIdentifierValue varchar(1000) NOT NULL,startframe varchar(100),endframe varchar(100),hash1 varchar(27),hash2 varchar(27),hash3 varchar(27),hash4 varchar(27),hash5 varchar(27),hash6 varchar(27),hash7 varchar(27),hash8 varchar(27),hash9 varchar(27), PRIMARY KEY (hashNumber" | mysql --login-path=tempsetting "$DB_NAME"
+echo "CREATE TABLE fingerprints (hashNumber bigint NOT NULL AUTO_INCREMENT, objectIdentifierValue varchar(1000) NOT NULL,startframe varchar(100),endframe varchar(100),hash1 varchar(27),hash2 varchar(27),hash3 varchar(27),hash4 varchar(27),hash5 varchar(27),hash6 varchar(27),hash7 varchar(27),hash8 varchar(27),hash9 varchar(27), PRIMARY KEY (hashNumber))" | mysql --login-path=tempsetting "$DB_NAME"
 
 echo "CREATE INDEX hashindex ON fingerprints (hash1(27))" | mysql --login-path=tempsetting "$DB_NAME"
 _error_check
