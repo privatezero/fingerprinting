@@ -2,7 +2,7 @@
 
 
 ## Current Notes
-Split each rough hash component into 9 chuncks 27 characters long -> Convert each chunk to decimal -> store decimal chunks in database.
+Split each rough hash component into 9 chunks 27 characters long -> Convert each chunk to decimal -> store decimal chunks in database.
 
 Query for hamming distance SELECT BITE_COUNT(QueryChunkDecimal1 ^ HashChunkDecimal1)
 
