@@ -52,19 +52,19 @@ while [ "${*}" != "" ] ; do
     fi
     _unset_variables
     _find_input "${INPUT}"
-    MEDIAID=$(basename "${INPUT}" | cut -d. -f1)
+    MEDIA_ID=$(basename "${INPUT}" | cut -d. -f1)
 
     if [ "${FINGERDIR}" != "" ] ; then
         _mkdir2 "${FINGERDIR}"
     fi
     #Generate Fingerprint
-    SIGNATURE="${MEDIAID}""${SUFFIX}"."${EXTENSION}"
+    SIGNATURE="${MEDIA_ID}""${SUFFIX}"."${EXTENSION}"
     _run_critical_event ffmpeg "${FFMPEGINPUT[@]}" -vf signature=format=xml:filename="${FINGERDIR}/${SIGNATURE}" -map 0:v -f null -
     FINGERPRINT_XML="${FINGERDIR}/${SIGNATURE}"
 
 #Report to DB
+    echo "Reporing to DB"
     _fingerprint_to_db
-    _report_to_db
     _report_fingerprint_db
     gzip "${FINGERPRINT_XML}"
 done
