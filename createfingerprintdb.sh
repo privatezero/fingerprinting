@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPTDIR=$(dirname "${0}")
+DBCONFIG="${SCRIPTDIR}"/FINGERPRINTDB_CONFIG.txt
+
 usage(){
     echo "This script will configure a database, users and login profiles"
     echo "Usage: -c (create database) -u (create user) -h (help)"
@@ -14,22 +17,10 @@ exit 1
 fi
 }
 
-OPTIND=1
-while getopts "hcu" opt ; do
-    case "${opt}" in
-        h) usage ;;
-        c) runtype="create";;
-        u) runtype="user";;
-        *)
-    esac
-done
-
-if [ "${*}" = "" ] ; then
-    usage
+if [ -f "${DBCONFIG}" ] ; then
+    echo "DB CONFIG ALREADY EXISTS. PLEASE DELETE OR MOVE TO CONFIGURE NEW DATABASE. EXITING." && exit
 fi
 
-#create database option
-if [ "$runtype" = "create" ] ; then
 #get input for database creation
 echo "This script will create the database used by mm on your localhost."
 echo "Please enter root password for mysql:"
@@ -48,18 +39,7 @@ _error_check
 #remove root config
 mysql_config_editor remove --login-path=tempsetting
 
-#Option to continue on to user creation
-echo -e "\033[1;103;95mDatabase has been created\033[0m"
-echo -e "\033[1;103;95mDo You wish to create a user? Y or N?\033[0m"
-read user_input
-continue=$(echo "$user_input" | tr '[:upper:]' '[:lower:]')
-if [ "$continue" = "y" ] ; then
-    runtype="user"
-fi
-fi
 
-#create user option
-if [ "$runtype" = "user" ] ; then
 #get input for user creation
 echo "This will create a user on the mm database"
 if [ -z "$DB_NAME" ] ; then
@@ -70,8 +50,8 @@ echo "Please enter the name of user to be created"
 read -r USER_NAME
 echo "Please enter the password for the new user"
 read -r USER_PASSWORD
-echo "Please enter the location (IP address) of user to be created. To create a user on a locally installed database type: localhost"
-read -r USER_HOST
+echo "Creating user at localhost"
+USER_HOST="localhost"
 echo "Please enter mysql root password"
 mysql_config_editor set --login-path=tempsetting --host=localhost --user=root --password
 
@@ -98,4 +78,6 @@ echo -e "\033[1;103;95mDatabase Profile is: "$USER_NAME"_config\033[0m"
 echo -e "\033[1;103;95mDatabase Name is: "$DB_NAME"\033[0m"
 #remove root config
 mysql_config_editor remove --login-path=tempsetting
-fi
+
+echo "DBNAME=\"${DB_NAME}\"" > "${DBCONFIG}"
+echo "DBLOGINPATH=\"${USER_NAME}_config\"" >> "${DBCONFIG}"

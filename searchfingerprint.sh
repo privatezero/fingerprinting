@@ -3,10 +3,7 @@ SCRIPTNAME=$(basename "${0}")
 SCRIPTDIR=$(dirname "${0}")
 
 . "${SCRIPTDIR}/mmfunctions" || { echo "Missing '${SCRIPTDIR}/mmfunctions'. Exiting." ; exit 1 ;};
-
-# DB SETTINGS
-DBNAME="TEST"
-DBLOGINPATH="TEST_config"
+. "${SCRIPTDIR}/FINGERPRINTDB_CONFIG.txt" || { echo "Missing '${SCRIPTDIR}/FINGERPRINTDB_CONFIG.txt'. Exiting." ; exit 1 ;};
 
 _usage(){
 cat << EOF;
