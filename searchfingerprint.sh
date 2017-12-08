@@ -42,7 +42,12 @@ while [ "${*}" != "" ] ; do
     shift
 
     #Confirm input is a video file
-    if [[ -z $(file -i "${INPUT}" | grep video) ]] ; then
+    if [[ "$(uname -s)" = Darwin ]] ; then
+        VIDEOCHECK='file -Ib'
+    else
+        VIDEOCHECK='file -i'
+    fi
+    if [[ -z $(${VIDEOCHECK} "${INPUT}" | grep video) ]] ; then
         echo "Input is not a video file" && continue
     fi
 
