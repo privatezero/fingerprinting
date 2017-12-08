@@ -5,8 +5,8 @@ SCRIPTDIR=$(dirname "${0}")
 . "${SCRIPTDIR}/mmfunctions" || { echo "Missing '${SCRIPTDIR}/mmfunctions'. Exiting." ; exit 1 ;};
 
 # DB SETTINGS
-DBNAME=""
-DBLOGINPATH=""
+DBNAME="TEST"
+DBLOGINPATH="TEST_config"
 
 _usage(){
 cat << EOF;
@@ -98,92 +98,5 @@ while [ "${*}" != "" ] ; do
         echo "SELECT objectIdentifierValue,startframe,endframe,hash1,hash2 FROM fingerprints WHERE BIT_COUNT(hash1 ^ '${hashdec1}') + BIT_COUNT(hash2 ^ '${hashdec2}') + BIT_COUNT(hash3 ^ '${hashdec3}') + BIT_COUNT(hash4 ^ '${hashdec4}') + BIT_COUNT(hash5 ^ '${hashdec5}') + BIT_COUNT(hash6 ^ '${hashdec6}') + BIT_COUNT(hash7 ^ '${hashdec7}') + BIT_COUNT(hash8 ^ '${hashdec8}') + BIT_COUNT(hash9 ^ '${hashdec9}') <= 2" | mysql --login-path="${DBLOGINPATH}"  "${DBNAME}" | tr '\t' ' ' | grep -v "objectIdentifierValue" >> "${RESULTS}"
     done)
     echo
-
-    #Exit if no results found
-    if [[ -z $(cat "${RESULTS}") ]] ; then
-        echo "No potential matches were found." && exit 0
-    fi
-    echo "Potential matches were found in the following frame ranges:"
-    echo
-
-    #Loop for sorting possible matches divided by files and chunks of approximately 500 frames (Finds an input and then first output after 500)
-    while read -r RESULT ; do
-    RESULTNAME=$(echo "$RESULT" | cut -d' ' -f1)
-    INFRAME=$(echo "$RESULT" | cut -d' ' -f2)
-    OUTFRAME=$(echo "$RESULT" | cut -d' ' -f3)
-    HASHMATCH=$(echo "$RESULT" | cut -d' ' -f4- | tr ' ' ':')
-
-    if [ -z ${INTIME} ] ; then
-        INTIME=0
-    fi
-
-    #Checks if the result is a new file. Marks last out time for previous file and new file name.
-    if ! [[ "${RESULTNAME}" = "${LASTRESULTNAME}" ]] ; then
-        if [ -n "${FINALOUT}" ] ; then
-            if  ! [ "${FINALOUT}" = "${LASTOUTFRAME}" ] ||  ! [ "${LARGEMATCH}" = 1 ]; then
-                echo "Out ${FINALOUT}" | tee -a "${DRAWTEXT}"
-                echo "outpoint $((( $(grep "${FINALHASH}" "${TEMPFINGERPRINT_SORTED}" | cut -d':' -f2 | head -n 1) / 30 ) + ${INTIME}))" >> "${VISUALRESULTS}"
-            fi
-            FINALOUT=''
-            FINALHASH=''
-            LARGEMATCH=''
-        fi
-        LASTRESULTNAME=$(echo "$RESULT" | cut -d' ' -f1)
-        LASTOUTFRAME=''
-        LASTINFRAME=''
-        echo | tee -a "${DRAWTEXT}"
-        echo "${LASTRESULTNAME}" | tee -a "${DRAWTEXT}"
-        echo "------"  | tee -a "${DRAWTEXT}"
-    fi
-
-    #Checks if new frame match preceeds previous matches and resets variables
-    if [[ ${INFRAME} -lt ${LASTINFRAME} ]] ; then
-        if ! [ "${NEWIN}" = "1" ] ; then
-            echo "Out ${FINALOUT}" | tee -a "${DRAWTEXT}"
-            echo "outpoint $((($(grep "${FINALHASH}" "${TEMPFINGERPRINT_SORTED}" | cut -d':' -f2 | head -n 1) / 30 ) + ${INTIME}))" >> "${VISUALRESULTS}"
-        fi
-        LASTOUTFRAME=''
-        LASTINFRAME=''
-        SMALLFINALMATCH='1'
-    fi
-
-    # Checks if match is first matching chunk for that file (or after reset) and sets variable
-    if [ -z "${LASTINFRAME}" ] ; then
-        LASTINFRAME="${INFRAME}"
-        NEWIN=1
-    fi
-    # Sets variable if empty (first match after reset)
-    if [ -z "${LASTOUTFRAME}" ] ; then
-        LASTOUTFRAME="${OUTFRAME}"
-    fi
-    # Marks input if first match for file or after reset
-    if  [ "${NEWIN}" = "1" ] ; then
-        echo "In ${INFRAME}" | tee -a "${DRAWTEXT}"
-        LASTINFRAME="${INFRAME}"
-        echo "file '${INPUT}'" >> "${VISUALRESULTS}"
-        echo "inpoint $((($(grep "${HASHMATCH}" "${TEMPFINGERPRINT_SORTED}" | cut -d':' -f1 | head -n 1) / 30 ) + ${INTIME}))" >> "${VISUALRESULTS}"
-        NEWIN=''
-    fi
-    # Marks output after 500 frame threshold is exceded
-    if [[ "${OUTFRAME}" -gt $(( ${LASTINFRAME} + 500 )) ]] ; then
-        LASTOUTFRAME="${OUTFRAME}"
-        NEWIN='1'
-        LARGEMATCH='1'
-        SMALLFINALMATCH=''
-        echo "Out ${LASTOUTFRAME}" | tee -a "${DRAWTEXT}"
-        echo "outpoint $((($(grep "${HASHMATCH}" "${TEMPFINGERPRINT_SORTED}" | cut -d':' -f2 | head -n 1) / 30 ) + ${INTIME}))" >> "${VISUALRESULTS}"
-    fi
-    FINALOUT="${OUTFRAME}"
-    FINALHASH="${HASHMATCH}"
-
-    done < <(cat "${RESULTS}" | sort -u)
-    #Marks the last outpoint of last file
-    if ! [ "${FINALOUT}" = "${LASTOUTFRAME}" ] ||  ! [ "${LARGEMATCH}" = 1 ] || [ "${SMALLFINALMATCH}" = 1 ] ; then
-        echo "Out ${FINALOUT}"  | tee -a "${DRAWTEXT}"
-        echo "outpoint $((($(grep "${FINALHASH}" "${TEMPFINGERPRINT_SORTED}" | cut -d':' -f2 | head -n 1) / 30 ) + ${INTIME}))" >> "${VISUALRESULTS}"
-    fi
+    cat "${RESULTS}" | sort -u
 done
-#Play footage from input for which possible matches were found
-if ! [ "${MODE}" = 'text' ] ; then
-    ffplay -hide_banner -loglevel panic -f concat -safe 0 -i "${VISUALRESULTS}" -vf drawtext=fontcolor=white:box=1:boxcolor=black@.4:fontsize=20:fontfile="${FFMPEGFONTPATH}":textfile="${DRAWTEXT}"
-fi

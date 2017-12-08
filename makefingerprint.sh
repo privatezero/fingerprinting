@@ -2,13 +2,10 @@
 # makefingerprint generates a video perceptual hash for an input
 SCRIPTDIR=$(dirname $(which "${0}"))
 . "${SCRIPTDIR}/mmfunctions" || { echo "Missing '${SCRIPTDIR}/mmfunctions'. Exiting." ; exit 1 ;};
+. "${SCRIPTDIR}/FINGERPRINTDB_CONFIG.txt" || { echo "Missing '${SCRIPTDIR}/FINGERPRINTDB_CONFIG.txt'. Exiting." ; exit 1 ;};
 SUFFIX="_signature"
 EXTENSION="xml"
 RELATIVEPATH="metadata"
-
-## Insert DB Settings Here!
-DBNAME=""
-DBLOGINPATH=""
 
 _report_fingerprint_db(){
     table_name="fingerprints"
@@ -35,7 +32,7 @@ _report_fingerprint_db(){
 }
 
 _fingerprint_to_db(){
-VIDEOFINGERPRINT=$(xmlstarlet sel -N "m=urn:mpeg:mpeg7:schema:2001" -t -m "m:Mpeg7/m:DescriptionUnit/m:Descriptor/m:VideoSignatureRegion/m:VSVideoSegment" -v m:StartFrameOfSegment -o ':' -v m:EndFrameOfSegment -o ':' -m m:BagOfWords -v "translate(.,' ','')" -o ':' -b -n "${FINGERPRINT_XML}")
+VIDEOFINGERPRINT=$("${XMLSTARLET}" sel -N "m=urn:mpeg:mpeg7:schema:2001" -t -m "m:Mpeg7/m:DescriptionUnit/m:Descriptor/m:VideoSignatureRegion/m:VSVideoSegment" -v m:StartFrameOfSegment -o ':' -v m:EndFrameOfSegment -o ':' -m m:BagOfWords -v "translate(.,' ','')" -o ':' -b -n "${FINGERPRINT_XML}")
 }
 
 while [ "${*}" != "" ] ; do

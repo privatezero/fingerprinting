@@ -1,0 +1,2 @@
+DBNAME="TEST"
+DBLOGINPATH="TEST_config"
